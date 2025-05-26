@@ -28,3 +28,4 @@ Documentation at [rtl_433](https://github.com/merbanan/rtl_433), install `apt in
 ```
 rtl_433 -f 912380000 -s 2359296 -X "n=r900,m=OOK_PCM, s=30, l=30, r=320, preamble={8}0xaa"
 ```
+to check if water meters in your area are broadcasting messages. Frequency and sample rate are taken from rtlamr project.
