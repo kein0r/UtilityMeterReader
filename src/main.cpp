@@ -36,7 +36,7 @@ void RF69ISR()
     //lastCRCOk = rf69.spiRead((RH_RF69_REG_28_IRQFLAGS2 & RH_RF69_IRQFLAGS2_CRCOK) >> 1);
   
     rf69.setModeIdle();
-    rf69.spiBurstRead(RH_RF69_REG_00_FIFO, rxBufferIDM, 0x5c-2-2);
+    rf69.spiBurstRead(RH_RF69_REG_00_FIFO, rxBufferIDM, 0x5c-2);
     rf69.setModeRx();
     rxBufferValid = true;
   }
@@ -67,7 +67,7 @@ void setup() {
   rf69.setModemConfig(RH_RF69::OOK_Rb2_4Bw4_8);
   /* Change to fix-length, Manchester encoding and set to trigger ISR even if CRC does not match. */
   rf69.spiWrite(RH_RF69_REG_37_PACKETCONFIG1, (RH_RF69_PACKETCONFIG1_PACKETFORMAT_VARIABLE | RH_RF69_PACKETCONFIG1_DCFREE_MANCHESTER  | RH_RF69_PACKETCONFIG1_CRCAUTOCLEAROFF | RH_RF69_PACKETCONFIG1_ADDRESSFILTERING_NONE));
-  rf69.spiWrite(RH_RF69_REG_38_PAYLOADLENGTH, 0x5c-2-2);  /* 0x5c minus preamble and CRC (each two bytes) */
+  //rf69.spiWrite(RH_RF69_REG_38_PAYLOADLENGTH, 0x5c);  /* 0x5c minus preamble and CRC (each two bytes) */
   rf69.setPreambleLength(IDM_PREAMBLELENGTH);
   /* map interrupt to own function */
   attachInterrupt(digitalPinToInterrupt(RFM69_INT), RF69ISR, RISING);
@@ -79,6 +79,7 @@ void setup() {
 void loop() {
  if (rxBufferValid)
  {
+    Serial.println();
     Serial.print(millis());
     Serial.print(": Rcvd: ");
     ATOMIC_BLOCK_START;
@@ -87,7 +88,6 @@ void loop() {
       Serial.print(rxBufferIDM[i], HEX);
       Serial.print(" ");
     }
-    Serial.println("\r\n");
     rxBufferValid = false;
     ATOMIC_BLOCK_END;
  }
