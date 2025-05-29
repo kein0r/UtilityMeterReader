@@ -23,11 +23,11 @@ bool RFM69::init(uint16_t baudrate)
         writeRegister(RFM69_REGOPMODE, RFM69_REGOPMODE_MODE_STBY);
         /* Enable packet mode with OOK */
         writeRegister(RFM69_REGDATAMODUL, RFM69_REGDATAMODUL_MODULATIONSHAPING_OOKNOSHAPING | RFM69_REGDATAMODUL_MODULATIONTYPE_OOK | RFM69_REGDATAMODUL_DATAMODE_PACKETMODE);
-        setBaudrate(RFM69_REGBITRATE_32768);
+        setBaudrate(baudrate);
         /* "Unlimited length packet format is selected when bit PacketFormat is set to 0 and PayloadLength is 
          * set to 0 ... This mode is a replacement for the legacy buffered mode in RF63/RF64 transceivers" */
-        writeRegister(RFM69_REGPREAMBLEMSB, 0x0);
-        writeRegister(RFM69_REGPREAMBLELSB, 0x0);
+        writeRegister(RFM69_REGPACKETCONFIG1, RFM69_REGPACKETCONFIG1_ADDRESSFILTERING_NONE | RFM69_REGPACKETCONFIG1_CRCAUTOCLEAROFF_NOCLEAR | RFM69_REGPACKETCONFIG1_CRCON_OFF | RFM69_REGPACKETCONFIG1_DCFREE_NONE | RFM69_REGPACKETCONFIG1_PACKETFORMAT_VARIABLELENGTH );
+        writeRegister(RFM69_REGPAYLOADLENGTH, 0x0);
         retValue = true;
     }
     return retValue;   
@@ -39,7 +39,13 @@ void RFM69::setBaudrate(uint16_t baudrate)
     regValue = (baudrate >> 8) & 0xff;
     writeRegister(RFM69_REGBITRATEMSB, regValue);
     regValue = baudrate & 0xff;
-    writeRegister(RFM69_REGBITRATELSB);
+    writeRegister(RFM69_REGBITRATELSB, regValue);
+}
+
+void RFM69::setPreamble(uint8_t *preamble, uint8_t length)
+{
+    writeRegister(RFM69_REGPREAMBLEMSB, 0x0);
+    writeRegister(RFM69_REGPREAMBLELSB, 0x0);
 }
 
 void RFM69::setMode(uint8_t mode)
