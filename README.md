@@ -1,6 +1,8 @@
 # Utility Meter Reader
 
 Raspberry RP2040 and RFM69 based utility meter reader based on Adafruit STEMMA QT board https://www.adafruit.com/product/5712 with simple spring antenna https://www.adafruit.com/product/4269.
+Center frequency: 912.38MHz
+Baudrate: 32768
 
 ## Protocols
 
