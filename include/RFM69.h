@@ -45,18 +45,36 @@
 
 #define RFM69_REGPREAMBLEMSB 0x02c
 #define RFM69_REGPREAMBLELSB 0x02d
+
 #define RFM69_REGSYNCCONFIG 0x0e
 #define RFM69_REGSYNCCONFIG_SYNCSIZE_MASK (0x7 << 3)
 #define RFM69_REGSYNCCONFIG_FIFOFILLCONDITION
 #define RFM69_REGSYNCCONFIG_SYNCON_ON
 
+#define RFM69_REGPACKETCONFIG1                                  0x37
+#define RFM69_REGPACKETCONFIG1_ADDRESSFILTERING_NONE            (0x0 << 1)
+#define RFM69_REGPACKETCONFIG1_ADDRESSFILTERING_NODEADDRESS     (0x1 << 1)
+#define RFM69_REGPACKETCONFIG1_ADDRESSFILTERING_NODEORBCADDRESS (0x2 << 1)
+#define RFM69_REGPACKETCONFIG1_CRCAUTOCLEAROFF_CLEAR            (0x0 << 3)
+#define RFM69_REGPACKETCONFIG1_CRCAUTOCLEAROFF_NOCLEAR          (0x1 << 3)
+#define RFM69_REGPACKETCONFIG1_CRCON_OFF                        (0x0 << 4)
+#define RFM69_REGPACKETCONFIG1_CRCON_ON                         (0x1 << 4)
+#define RFM69_REGPACKETCONFIG1_DCFREE_NONE                      (0x0 << 5)
+#define RFM69_REGPACKETCONFIG1_DCFREE_MANCHESTER                (0x1 << 5)
+#define RFM69_REGPACKETCONFIG1_DCFREE_WHITENING                 (0x2 << 5)
+#define RFM69_REGPACKETCONFIG1_PACKETFORMAT_FIXEDLENGTH         (0x0 << 7)
+#define RFM69_REGPACKETCONFIG1_PACKETFORMAT_VARIABLELENGTH      (0x1 << 7)
+
+#define RFM69_REGPAYLOADLENGTH 0x38
+
 class RFM69
 {
 public:
   RFM69(uint8_t slaveSelectPin = SS, uint8_t interruptPin = 2, uint8_t *buffer = nullptr);
-  bool init(uint16_t baudrate = );
+  bool init(uint16_t baudrate = RFM69_REGBITRATE_32768);
   void setFrequency(float centerFrequency);
   void setBaudrate(uint16_t baudrate);
+  void setPreamble(uint8_t *preamble, uint8_t length);
   void setMode(uint8_t mode);
   void writeRegister (uint8_t reg, uint8_t value);
   uint8_t readRegister (uint8_t reg);
