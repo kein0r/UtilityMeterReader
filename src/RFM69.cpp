@@ -52,10 +52,11 @@ void RFM69::setBaudrate(uint16_t baudrate)
     writeRegister(RFM69_REGBITRATELSB, regValue);
 }
 
-void RFM69::setPreamble(uint8_t *preamble, uint8_t length)
+void RFM69::setSampleRate(uint8_t RxBwMant, uint8_t RxBwExp)
 {
-    writeRegister(RFM69_REGPREAMBLEMSB, 0x0);
-    writeRegister(RFM69_REGPREAMBLELSB, 0x0);
+    uint8_t regValue;
+    regValue = RFM69_REGRXBW_DCCFREQ_4PERCENT | RxBwMant | RxBwExp;
+    writeRegister(RFM69_REGRXBW, regValue);
 }
 
 void RFM69::setMode(uint8_t mode)

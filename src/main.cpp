@@ -58,7 +58,7 @@ void setup() {
   digitalWrite(RFM69_RST, LOW);
   delay(10);
   delay(5000);
-  if (!rfm69.init(RFM69_REGBITRATE_32768)) {
+  if (!rfm69.init(912.38, 32768)) {
     Serial.println("RFM69 radio init failed");
     while (1);
   }

@@ -10,8 +10,7 @@
  * turned out to have too much overhead for what's needed and not support "Unlimited Length Packet 
  * Format".
  * Limitations:
- * - Only RX mode supported and only in "unlimited length packet format" mode (PacketFormat set to 0
- *   and PayloadLength set to 0
+ * - Only RX mode supported
  * - Application needs to provide big enough buffer and receive needs to be called often enough to not 
  *   loose/miss data
  * 
@@ -150,10 +149,10 @@ class RFM69
 {
 public:
   RFM69(uint8_t slaveSelectPin = SS, uint8_t interruptPin = 2, uint8_t *buffer = nullptr);
-  bool init(float frequency = 912.38, uint16_t baudrate = RFM69_REGBITRATE_32768);
+  bool init(float frequency = 912.38, uint16_t baudrate = 32768);
   void setFrequency(float centerFrequency);
   void setBaudrate(uint16_t baudrate);
-  void setPreamble(uint8_t *preamble, uint8_t length);
+  void setSampleRate(uint8_t RxBwMant, uint8_t RxBwExp);
   void setMode(uint8_t mode);
   void writeRegister (uint8_t reg, uint8_t value);
   uint8_t readRegister (uint8_t reg);
