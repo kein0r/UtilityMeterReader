@@ -26,7 +26,9 @@ Technically "5.5.2.1. Fixed Length Packet Format" should be usable configuring i
 - Payload length 21
 - No CRC
 
-Note: datasheet mentions 12 bits as well as minimum of 12 bits of received preamble
+| Preamble <br> 0 to 65535 <br> bytes  | Sync Word <br> 0 to 8 bytes | Message <br> Up to 255 bytes| CRC <br> 2 bytes |
+| --                                   | --                          | --                          | --               |
+|                                      |                             | Payload (min 1 byte)        |                  |
 
 Fixed length packet format is selected when bit PacketFormat is set to 0 and PayloadLength is set to any value greater
 than 0.  
