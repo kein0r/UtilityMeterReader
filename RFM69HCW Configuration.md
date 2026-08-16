@@ -47,19 +47,20 @@ Registers used. All non-mentioned bits default to 0
 ## Receiver Registers
 | Name          | Address | Bits  | Name                  | Description                  |
 | ----          | ------- | ----  | ----                  | -----------                  |
+| RegRxBw       | 0x19    | 7-5   | DccFreq               | Cut-off frequency of the DC offset canceller (DCC). Default 010 |
+|               |         | 4-3   | RxBwMant              | Channel filter bandwidth control <br> 00 → RxBwMant = 16 |
+
 
 ## Registers to be checked
 | Name          | Address | Bits  | Name                  | Description                  |
 | ----          | ------- | ----  | ----                  | -----------                  |
-| RegBitrateMsb | 0x03    | 7-0   | BitRate               | MSB of Bit Rate (Chip Rate when Manchester encoding is enabled) |
-| RegBitrateLsb | 0x04    | 7-0   | BitRate               | LSB of Bit Rate (Chip Rate when Manchester encoding is enabled) |
 | RegFdevMsb    | 0x05    | 5-0   | DataMode              | MSB of the frequency deviation |
 | RegFdevLsb    | 0x06    | 7-0   | DataMode              | LSB of the frequency deviation |
 
 ## Register values 
 Frf = Fstep ⋅ Frf 23;0 (Default: 915 = 32MHz ⋅14,991,360) tbc
 
-## RegListen1, RegListen2, RegListen3
+### RegListen1, RegListen2, RegListen3
 Power consumption is not a problem. Minimize idle time, maximize Rx time.
 - RegListen1 0b01110010 = 0x72
   - 7-6: ListenResolIdle 01
@@ -70,6 +71,14 @@ Power consumption is not a problem. Minimize idle time, maximize Rx time.
 - RegListen2 ListenCoefIdle  = 0x01. 64us * 1 = 64us
 - RegListen3 ListenCoefRx  = 0xff. 0.0262s * 255 = 67s
 
+### RegRxBw
+Maximum sample rate for OOK (Table 14 Available RxBw Settings) is 250kHz
+| RxBwMant <br> (binary/value) | RxBwExp <br> (decimal) | RxBw (kHz) OOK ModulationType=01 |
+| ---------------------------- | ---------------------- | -------------------------------- |
+| 00b / 16                     | 0                      | 250.0                            |
+
+RegRxBw: 0b01000000
+
 
 # Initialization
 1. Switch device to Stand-by Mode (RegOpMode: ListenOn = 0, Mode = 0x1)
@@ -78,10 +87,7 @@ Power consumption is not a problem. Minimize idle time, maximize Rx time.
 5. Packet mode (recommended)
 
 # To be checked
-- tListenIdle in Listen Mode?
 - idel time check for end of package
-- Bit rate for OOK RX RegBitrateMsb and RegBitrateLsb seems to only be for Manchester encoding?
-- ListenEnd value!
 - "Timeout interrupt occurs"?
 
 # Datasheet
