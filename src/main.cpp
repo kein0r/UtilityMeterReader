@@ -1,6 +1,6 @@
 #include <Arduino.h>
 #include <SPI.h>
-#include <RH_RF69.h>
+#include <RFM69.h>
 
 /**
  * RFM69 related definitions
@@ -11,8 +11,11 @@
 #define RFM69_RST  17
 #define LED        LED_BUILTIN
 
+bool rxBufferValid = false;
+uint8_t rxBufferIDM[0x5c];
+
 // Singleton instance of the radio driver
-RH_RF69 rf69(RFM69_CS, RFM69_INT);
+RFM69 rfm69(RFM69_CS, RFM69_INT, rxBufferIDM);
 
 /*
  * Interval Data Message (IDM) related stuff
@@ -21,9 +24,7 @@ uint8_t IDMMessageSyncWord[] = { 0xaa, 0xaa };
 #define IDM_PREAMBLELENGTH     (uint8_t)2
 #define IDM_SYNCWORDLENGTH     (uint8_t)sizeof(IDMMessageSyncWord)
 
-bool rxBufferValid = false;
-uint8_t rxBufferIDM[0x5c];
-
+#if 0
 void RF69ISR()
 { 
   // Get the interrupt cause
@@ -43,6 +44,8 @@ void RF69ISR()
   ATOMIC_BLOCK_END;
 }
 
+#endif
+
 void setup() {
   pinMode(LED, OUTPUT);
   pinMode(RFM69_RST, OUTPUT);
@@ -55,25 +58,13 @@ void setup() {
   digitalWrite(RFM69_RST, LOW);
   delay(10);
   delay(5000);
-  if (!rf69.init()) {
+  if (!rfm69.init(RFM69_REGBITRATE_32768)) {
     Serial.println("RFM69 radio init failed");
     while (1);
   }
   Serial.println("RFM69 radio init OK!");
 
-  if (!rf69.setFrequency(RFM69_FREQ)) {
-    Serial.println("setFrequency failed");
-  }
-  rf69.setModemConfig(RH_RF69::OOK_Rb2_4Bw4_8);
-  /* Change to fix-length, Manchester encoding and set to trigger ISR even if CRC does not match. */
-  rf69.spiWrite(RH_RF69_REG_37_PACKETCONFIG1, (RH_RF69_PACKETCONFIG1_PACKETFORMAT_VARIABLE | RH_RF69_PACKETCONFIG1_DCFREE_MANCHESTER  | RH_RF69_PACKETCONFIG1_CRCAUTOCLEAROFF | RH_RF69_PACKETCONFIG1_ADDRESSFILTERING_NONE));
-  //rf69.spiWrite(RH_RF69_REG_38_PAYLOADLENGTH, 0x5c);  /* 0x5c minus preamble and CRC (each two bytes) */
-  rf69.setPreambleLength(IDM_PREAMBLELENGTH);
-  /* map interrupt to own function */
-  attachInterrupt(digitalPinToInterrupt(RFM69_INT), RF69ISR, RISING);
-  /* rf69.setSyncWords(IDMMessageSyncWord, IDM_SYNCWORDLENGTH); */
-  rf69.setSyncWords(IDMMessageSyncWord, 0);
-  rf69.setModeRx(); // Start receiving, we never switch out of this mode
+  rfm69.setFrequency(RFM69_FREQ);
 } 
 
 void loop() {
@@ -82,13 +73,10 @@ void loop() {
     Serial.println();
     Serial.print(millis());
     Serial.print(": Rcvd: ");
-    ATOMIC_BLOCK_START;
-    for (int i=0; i<sizeof(rxBufferIDM); i++)
-    {
-      Serial.print(rxBufferIDM[i], HEX);
-      Serial.print(" ");
-    }
-    rxBufferValid = false;
-    ATOMIC_BLOCK_END;
  }
+ delay(5000);
+ rfm69.printRegister(RFM69_REGOPMODE);
+ rfm69.printRegister(RFM69_REGDATAMODUL);
+ rfm69.printRegister(RFM69_REGBITRATEMSB);
+ rfm69.printRegister(RFM69_REGBITRATELSB);
 }
