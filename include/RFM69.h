@@ -16,7 +16,13 @@
  *   loose/miss data
  * 
  */
- 
+#define RFM69_REGWRITEMASK 0x80
+
+/* 3.2.3. PLL Architecture: F_Step = F_Xosc/2^19 */
+#define RFM69_FXOSC 32000000.0
+#define RFM69_FSTEP  (RFM69_FXOSC / 524288)
+
+/* 6.2. Common Configuration Registers */
 #define RFM69_REGFIFO                         0x00
 #define RFM69_REGOPMODE                       0x01
 #define RFM69_REGOPMODE_MODE_SLEEP            (0x0 << 2)
@@ -40,12 +46,19 @@
 #define RFM69_REGBITRATELSB    0x04
 #define RFM69_REGBITRATE_32768 0xd103
 
+#define RFM69_REGFRFMSB 0x07
+#define RFM69_REGFRFMID 0x08
+#define RFM69_REGFRFLSB 0x08
+
 #define RFM69_REGVERSION         0x10
 #define RFM69_REGVERSION_DEFAULT 0x24
 
 #define RFM69_REGPREAMBLEMSB 0x02c
 #define RFM69_REGPREAMBLELSB 0x02d
 
+/* 6.3. Transmitter Registers */
+
+/* 6.4. Receiver Registers */
 #define RFM69_REGSYNCCONFIG 0x0e
 #define RFM69_REGSYNCCONFIG_SYNCSIZE_MASK (0x7 << 3)
 #define RFM69_REGSYNCCONFIG_FIFOFILLCONDITION
@@ -65,13 +78,24 @@
 #define RFM69_REGPACKETCONFIG1_PACKETFORMAT_FIXEDLENGTH         (0x0 << 7)
 #define RFM69_REGPACKETCONFIG1_PACKETFORMAT_VARIABLELENGTH      (0x1 << 7)
 
+/* 6.5. IRQ and Pin Mapping Registers */
+#define RFM69_REGIRQFLAGS1 0x27
+#define RFM69_REGIRQFLAGS2              0x28
+#define RFM69_REGIRQFLAGS2_CRCOK        (0x1 << 1)
+#define RFM69_REGIRQFLAGS2_PAYLOADREADY (0x1 << 2)
+#define RFM69_REGIRQFLAGS2_PACKETSENT   (0x1 << 3)
+#define RFM69_REGIRQFLAGS2_FIFOOVERRUN  (0x1 << 4)
+#define RFM69_REGIRQFLAGS2_FIFOLEVEL    (0x1 << 5)
+#define RFM69_REGIRQFLAGS2_FIFONOTEMPTY (0x1 << 6)
+#define RFM69_REGIRQFLAGS2_FIFOFULL     (0x1 << 7)
+
 #define RFM69_REGPAYLOADLENGTH 0x38
 
 class RFM69
 {
 public:
   RFM69(uint8_t slaveSelectPin = SS, uint8_t interruptPin = 2, uint8_t *buffer = nullptr);
-  bool init(uint16_t baudrate = RFM69_REGBITRATE_32768);
+  bool init(float frequency = 912.38, uint16_t baudrate = RFM69_REGBITRATE_32768);
   void setFrequency(float centerFrequency);
   void setBaudrate(uint16_t baudrate);
   void setPreamble(uint8_t *preamble, uint8_t length);
