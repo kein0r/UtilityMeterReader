@@ -64,7 +64,13 @@ void setup() {
   }
   Serial.println("RFM69 radio init OK!");
 
-  rfm69.setFrequency(RFM69_FREQ);
+  Serial.println("Register overview:");
+  rfm69.printRegister(RFM69_REGFRFMSB);
+  rfm69.printRegister(RFM69_REGFRFMID);
+  rfm69.printRegister(RFM69_REGFRFLSB);
+  rfm69.printRegister(RFM69_REGBITRATEMSB);
+  rfm69.printRegister(RFM69_REGBITRATELSB);
+  rfm69.printRegister(RFM69_REGRXBW);
 } 
 
 void loop() {

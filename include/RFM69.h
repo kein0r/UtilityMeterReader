@@ -19,7 +19,7 @@
 
 /* 3.2.3. PLL Architecture: F_Step = F_Xosc/2^19 */
 #define RFM69_FXOSC 32000000.0
-#define RFM69_FSTEP  (RFM69_FXOSC / 524288)
+#define RFM69_FSTEP uint32_t(RFM69_FXOSC / 524288)
 
 /* 6.2. Common Configuration Registers */
 #define RFM69_REGFIFO                         0x00
@@ -62,8 +62,7 @@
 #define RFM69_REGLISTEN1_LISTENEND_STAYRXMODETHENIDLE        (0x3 << 1)
 
 #define RFM69_REGLISTEN2 0x0e
-
-#define RFM69_REGLISTEN2 0x0f
+#define RFM69_REGLISTEN3 0x0f
 
 #define RFM69_REGVERSION         0x10
 #define RFM69_REGVERSION_DEFAULT 0x24
@@ -103,9 +102,10 @@
 
 /* 6.6. Packet Engine Registers */
 #define RFM69_REGSYNCCONFIG 0x2e
-#define RFM69_REGSYNCCONFIG_SYNCSIZE_MASK (0x7 << 3)
-#define RFM69_REGSYNCCONFIG_FIFOFILLCONDITION
-#define RFM69_REGSYNCCONFIG_SYNCON_ON
+#define RFM69_REGSYNCCONFIG_SYNCON_OFF   (0x0 << 7)
+#define RFM69_REGSYNCCONFIG_SYNCON_ON    (0x1 << 7)
+#define RFM69_REGSYNCCONFIG_SYNCSIZE(a)  ((a & 0x7) << 3)
+
 
 #define RFM69_REGSYNCVALUE1 0x2f
 #define RFM69_REGSYNCVALUE2 0x30
@@ -149,9 +149,9 @@ class RFM69
 {
 public:
   RFM69(uint8_t slaveSelectPin = SS, uint8_t interruptPin = 2, uint8_t *buffer = nullptr);
-  bool init(float frequency = 912.38, uint16_t baudrate = 32768);
+  bool init(float frequency = 912.38, uint16_t bitrate = 32768);
   void setFrequency(float centerFrequency);
-  void setBaudrate(uint16_t baudrate);
+  void setBitrate(uint16_t bitrate);
   void setSampleRate(uint8_t RxBwMant, uint8_t RxBwExp);
   void setMode(uint8_t mode);
   void writeRegister (uint8_t reg, uint8_t value);

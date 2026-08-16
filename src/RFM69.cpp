@@ -1,3 +1,4 @@
+#include "mbed_retarget.h"
 #include <RFM69.h>
 
 RFM69::RFM69(uint8_t slaveSelectPin, uint8_t interruptPin, uint8_t *buffer):
@@ -7,7 +8,7 @@ RFM69::RFM69(uint8_t slaveSelectPin, uint8_t interruptPin, uint8_t *buffer):
 }
 
 /* Set registers in "6.2. Common Configuration Registers" */
-bool RFM69::init(float frequency, uint16_t baudrate)
+bool RFM69::init(float frequency, uint16_t bitrate)
 {
     bool retValue = false;
     uint8_t regValue;
@@ -23,11 +24,17 @@ bool RFM69::init(float frequency, uint16_t baudrate)
         /* Place RFM69 in standby and restore default just in case */
         writeRegister(RFM69_REGOPMODE, RFM69_REGOPMODE_MODE_STBY);
         /* Enable packet mode with OOK */
-        writeRegister(RFM69_REGDATAMODUL, RFM69_REGDATAMODUL_MODULATIONSHAPING_OOKNOSHAPING | RFM69_REGDATAMODUL_MODULATIONTYPE_OOK | RFM69_REGDATAMODUL_DATAMODE_PACKETMODE);
-        setBaudrate(baudrate);
+        writeRegister(RFM69_REGDATAMODUL, RFM69_REGDATAMODUL_DATAMODE_PACKETMODE | RFM69_REGDATAMODUL_MODULATIONTYPE_OOK | RFM69_REGDATAMODUL_MODULATIONSHAPING_OOKNOSHAPING);
+        setBitrate(bitrate);
         setFrequency(frequency);
-        /* "Unlimited length packet format is selected when bit PacketFormat is set to 0 and PayloadLength is 
-         * set to 0 ... This mode is a replacement for the legacy buffered mode in RF63/RF64 transceivers" */
+        /* Set highest possible sample rate for now */
+        setSampleRate(RFM69_REGRXBW_RXBWMANT_16, RFM69_REGRXBW_RXBWEXP_0);
+        /* Minimize idle time, maximize Rx time */
+        writeRegister(RFM69_REGLISTEN1, RFM69_REGLISTEN1_LISTENRESOLIDLE_64us | RFM69_REGLISTEN1_LISTENRESOLRX_262ms | RFM69_REGLISTEN1_LISTENEND_STAYRXMODEUNTILPAYLOADRDY);
+        writeRegister(RFM69_REGLISTEN2, 0x01);
+        writeRegister(RFM69_REGLISTEN3, 0xff);
+        /* Enable Fixed Length Packet Format */
+        writeRegister(RFM69_REGSYNCCONFIG, RFM69_REGSYNCCONFIG_SYNCON_OFF | RFM69_REGSYNCCONFIG_SYNCSIZE(0));
         writeRegister(RFM69_REGPACKETCONFIG1, RFM69_REGPACKETCONFIG1_ADDRESSFILTERING_NONE | RFM69_REGPACKETCONFIG1_CRCAUTOCLEAROFF_NOCLEAR | RFM69_REGPACKETCONFIG1_CRCON_OFF | RFM69_REGPACKETCONFIG1_DCFREE_NONE | RFM69_REGPACKETCONFIG1_PACKETFORMAT_VARIABLELENGTH );
         writeRegister(RFM69_REGPAYLOADLENGTH, 0x0);
         retValue = true;
@@ -37,19 +44,20 @@ bool RFM69::init(float frequency, uint16_t baudrate)
 
 void RFM69::setFrequency(float centerFrequency)
 {
-    uint32_t frf = (uint32_t)((centerFrequency * 1000000.0) / RFM69_FSTEP);
+    /* f_step = 32Mhz/2^19, RegFrf = f_rf/f_step = */
+    uint32_t frf = (centerFrequency * 1000000.0) / RFM69_FSTEP;
     writeRegister(RFM69_REGFRFMSB, (frf >> 16) & 0xff);
     writeRegister(RFM69_REGFRFMID, (frf >> 8) & 0xff);
     writeRegister(RFM69_REGFRFLSB, frf & 0xff);
 }
 
-void RFM69::setBaudrate(uint16_t baudrate)
+void RFM69::setBitrate(uint16_t bitrate)
 {
-    uint8_t regValue;
-    regValue = (baudrate >> 8) & 0xff;
-    writeRegister(RFM69_REGBITRATEMSB, regValue);
-    regValue = baudrate & 0xff;
-    writeRegister(RFM69_REGBITRATELSB, regValue);
+    uint16_t regValue;
+    regValue = 32000000 / bitrate;
+    writeRegister(RFM69_REGBITRATEMSB, (regValue >> 8) & 0xff);
+    regValue = bitrate & 0xff;
+    writeRegister(RFM69_REGBITRATELSB, regValue  & 0xff);
 }
 
 void RFM69::setSampleRate(uint8_t RxBwMant, uint8_t RxBwExp)
