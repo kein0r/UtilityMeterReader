@@ -2,6 +2,13 @@
 Reference: [RFM69HCW ISM Transceiver Module v1.1](https://cdn.sparkfun.com/datasheets/Wireless/General/RFM69HCW-V1.1.pdf).
 This is a summary or paste-bin of the information relevant for this project from the datasheet.
 
+# Datasheet
+Important Chapters in datasheet
+- 3.4.12. OOK Demodulator
+- 4.3. Listen Mode
+- 5.1.2. Data Operation Modes
+- 5.5.2.1. Fixed Length Packet Format
+
 # General Analysis and Description
 
 ## Listen Mode
@@ -19,6 +26,8 @@ Technically "5.5.2.1. Fixed Length Packet Format" should be usable configuring i
 - Payload length 21
 - No CRC
 
+Note: datasheet mentions 12 bits as well as minimum of 12 bits of received preamble
+
 Fixed length packet format is selected when bit PacketFormat is set to 0 and PayloadLength is set to any value greater
 than 0.  
 Downside of this is that only one type of meter can be read at any given point in time.
@@ -35,6 +44,8 @@ Registers used. All non-mentioned bits default to 0
 | RegDataModul  | 0x02    | 6-5   | DataMode              | 00 → Packet mode             |
 |               |         | 4-3   | ModulationType        | 01 → OOK                     |
 |               |         | 1-0   | ModulationShaping     | 00 → no shaping (default) tbc |
+| RegBitrateMsb | 0x03    | 6-5   | DataMode              | MSB of Bit Rate              |
+| RegBitrateLsb | 0x04    | 6-5   | DataMode              | LSB of Bit Rate              |
 | RegFrfMsb     | 0x07    | 7-0   | Fdev                  | MSB of the RF carrier frequency |
 | RegFrfMid     | 0x08    | 7-0   | Fdev                  | Middle byte of the RF carrier frequency |
 | RegFrfLsb     | 0x09    | 7-0   | Fdev                  | LSB of the RF carrier frequency |
@@ -49,16 +60,41 @@ Registers used. All non-mentioned bits default to 0
 | ----          | ------- | ----  | ----                  | -----------                  |
 | RegRxBw       | 0x19    | 7-5   | DccFreq               | Cut-off frequency of the DC offset canceller (DCC). Default 010 |
 |               |         | 4-3   | RxBwMant              | Channel filter bandwidth control <br> 00 → RxBwMant = 16 |
+|               |         | 2-0   | RxBwExp               | Channel filter bandwidth control exponent 00 (see below) |
 
-
-## Registers to be checked
-| Name          | Address | Bits  | Name                  | Description                  |
-| ----          | ------- | ----  | ----                  | -----------                  |
-| RegFdevMsb    | 0x05    | 5-0   | DataMode              | MSB of the frequency deviation |
-| RegFdevLsb    | 0x06    | 7-0   | DataMode              | LSB of the frequency deviation |
+## Packet Engine Registers
+| Name          | Address | Bits | Name                  | Description                  |
+| ----          | ------- | ---- | ----                  | -----------                  |
+| RegSyncConfig | 0x2e    | 7    | SyncOn                | Enables the Sync word detection 1 |
+|               |         | 5-3  | SyncSize              | Size of the Sync word (SyncSize + 1) bytes |
+|               |         | 2-0  | SyncTol               | Number of tolerated bit errors in Sync word 000 |
+| RegSyncValuex | 0x2f-36 | 7-0  | SyncValue             | n-th byte of Sync word |
+| RegPacketConfig1 | 0x37 | 7    | PacketFormat          | Defines the packet format used <br> 0 → Fixed length |
+|               |         | 6-5  | DcFree                | Defines DC-free encoding/decoding performed: <br> 00 → None (Off) (Default) |
+|               |         | 4    | CrcOn                 | Enables CRC calculation/check (Tx/Rx):<br> 0 → Off |
+|               |         | 3    | CrcAutoClearOff       | Defines the behavior of the packet handler when CRC check fails:<br> 1 → Do not clear FIFO. PayloadReady interrupt issued |
+|               |         | 2-1  | AddressFiltering      | Enables CRC calculation/check (Tx/Rx):<br> Defines address based filtering in Rx: 00 → None (Off) |
+| RegPayloadLength | 0x38 | 7-0  | PayloadLength         | If PacketFormat = 0 (fixed), payload length |
 
 ## Register values 
-Frf = Fstep ⋅ Frf 23;0 (Default: 915 = 32MHz ⋅14,991,360) tbc
+
+### RegDataModul
+- RegDataModul: 0b00001000
+  - Unused 0
+  - DataMode: 00
+  - ModulationType 01
+  - Unused 0
+  - ModulationShaping 00
+
+### RegBitrate, RegBitrate, RegFrf
+Bit rate = 32768, FXO = 32MHz RegBitrage = 32000000/32768 = 976,5625 (0x3d0)
+- RegBitrateMsb: 0x03
+- RegBitrateMsb: 0xd0
+
+Target frequency:
+- f_step = 32Mhz/2^19
+- f_rf = f_step * RegFrf
+- RegFrf = f_rf/f_step = f_rf * 2^19/32MHz
 
 ### RegListen1, RegListen2, RegListen3
 Power consumption is not a problem. Minimize idle time, maximize Rx time.
@@ -72,13 +108,12 @@ Power consumption is not a problem. Minimize idle time, maximize Rx time.
 - RegListen3 ListenCoefRx  = 0xff. 0.0262s * 255 = 67s
 
 ### RegRxBw
-Maximum sample rate for OOK (Table 14 Available RxBw Settings) is 250kHz
+Maximum sample rate for OOK (Table 14 Available RxBw Settings) is set to 250kHz
 | RxBwMant <br> (binary/value) | RxBwExp <br> (decimal) | RxBw (kHz) OOK ModulationType=01 |
 | ---------------------------- | ---------------------- | -------------------------------- |
 | 00b / 16                     | 0                      | 250.0                            |
 
-RegRxBw: 0b01000000
-
+- RegRxBw: 0b01000000
 
 # Initialization
 1. Switch device to Stand-by Mode (RegOpMode: ListenOn = 0, Mode = 0x1)
@@ -90,8 +125,3 @@ RegRxBw: 0b01000000
 - idel time check for end of package
 - "Timeout interrupt occurs"?
 
-# Datasheet
-Important Chapters are
-- 4.3. Listen Mode
-- 5.1.2. Data Operation Modes
-- 5.5.2.1. Fixed Length Packet Format
