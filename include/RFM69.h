@@ -148,7 +148,7 @@
 class RFM69
 {
 public:
-  RFM69(uint8_t slaveSelectPin = SS, uint8_t interruptPin = 2, uint8_t *buffer = nullptr);
+  RFM69(arduino::MbedSPI* spi, uint8_t slaveSelectPin = SS, uint8_t interruptPin = 2, uint8_t *buffer = nullptr);
   bool init(float frequency = 912.38, uint16_t bitrate = 32768);
   void setFrequency(float centerFrequency);
   void setBitrate(uint16_t bitrate);
@@ -166,6 +166,7 @@ public:
   uint8_t receive();
 
 private:
+  arduino::MbedSPI* _SPI;
   const uint8_t _slaveSelectPin;
 
   /** Pointer to application provided buffer to copy fifo content to */

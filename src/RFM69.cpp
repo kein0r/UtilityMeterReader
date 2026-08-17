@@ -1,8 +1,8 @@
-#include "mbed_retarget.h"
 #include <RFM69.h>
 
-RFM69::RFM69(uint8_t slaveSelectPin, uint8_t interruptPin, uint8_t *buffer):
+RFM69::RFM69(arduino::MbedSPI* spi, uint8_t slaveSelectPin, uint8_t interruptPin, uint8_t *buffer):
     _slaveSelectPin(slaveSelectPin),
+    _SPI(spi),
     _buffer(buffer)
 {
 }
@@ -14,7 +14,7 @@ bool RFM69::init(float frequency, uint16_t bitrate)
 
     pinMode(_slaveSelectPin, OUTPUT);
     digitalWrite(_slaveSelectPin, HIGH);
-    SPI.begin();
+    _SPI->begin();
 
     regValue = readRegister(RFM69_REGVERSION);
     /* Check if we can read version number and if it matches expected value */
@@ -81,8 +81,8 @@ void RFM69::writeRegister(uint8_t reg, uint8_t value)
     Serial.print(" : 0b");
     Serial.println(value, BIN);
     digitalWrite(_slaveSelectPin, LOW);
-    SPI.transfer(reg | RFM69_REGWRITEMASK);
-    SPI.transfer(value);
+    _SPI->transfer(reg | RFM69_REGWRITEMASK);
+    _SPI->transfer(value);
     digitalWrite(_slaveSelectPin, HIGH);
 }
 
@@ -91,8 +91,8 @@ uint8_t RFM69::readRegister(uint8_t reg)
     uint8_t regValue;
 
     digitalWrite(_slaveSelectPin, LOW);
-    SPI.transfer(reg);
-    regValue = SPI.transfer(0x00);
+    _SPI->transfer(reg);
+    regValue = _SPI->transfer(0x00);
     digitalWrite(_slaveSelectPin, HIGH);
     return regValue;
 }

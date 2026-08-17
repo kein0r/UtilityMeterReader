@@ -11,11 +11,22 @@
 #define RFM69_RST  17
 #define LED        LED_BUILTIN
 
+/* -------------------------------------------------------------------------
+ * Pin definitions (Adafruit Feather RP2040 RFM69 board)
+ * DIO1 requires a physical wire from the RFM69 DIO1 pad to an MCU GPIO.
+ * ------------------------------------------------------------------------- */
+#define RFM69_COPI    15
+#define RFM69_CIPO    8
+#define RFM69_SCK     14
+#define RFM69_CS      16
+arduino::MbedSPI SPI1(RFM69_CIPO, RFM69_COPI, RFM69_SCK);
+
+
 bool rxBufferValid = false;
 uint8_t rxBufferIDM[0x5c];
 
 // Singleton instance of the radio driver
-RFM69 rfm69(RFM69_CS, RFM69_INT, rxBufferIDM);
+RFM69 rfm69(&SPI1, RFM69_CS, RFM69_INT, rxBufferIDM);
 
 /*
  * Interval Data Message (IDM) related stuff
