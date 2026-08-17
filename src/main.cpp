@@ -74,6 +74,11 @@ void setup() {
     while (1);
   }
   Serial.println("RFM69 radio init OK!");
+<<<<<<< Updated upstream
+=======
+
+  rfm69.setMode(RFM69_REGOPMODE_MODE_RX);
+>>>>>>> Stashed changes
 
   Serial.println("Register overview:");
   rfm69.printRegister(RFM69_REGFRFMSB);
@@ -93,7 +98,5 @@ void loop() {
  }
  delay(5000);
  rfm69.printRegister(RFM69_REGOPMODE);
- rfm69.printRegister(RFM69_REGDATAMODUL);
- rfm69.printRegister(RFM69_REGBITRATEMSB);
- rfm69.printRegister(RFM69_REGBITRATELSB);
+ rfm69.printRegister(RFM69_REGIRQFLAGS2);
 }
