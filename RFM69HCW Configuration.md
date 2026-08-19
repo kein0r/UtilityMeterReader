@@ -50,11 +50,6 @@ Registers used. All non-mentioned bits default to 0
 | RegFrfMsb     | 0x07    | 7-0   | Fdev                  | MSB of the RF carrier frequency |
 | RegFrfMid     | 0x08    | 7-0   | Fdev                  | Middle byte of the RF carrier frequency |
 | RegFrfLsb     | 0x09    | 7-0   | Fdev                  | LSB of the RF carrier frequency |
-| RegListen1    | 0x0d    | 7-6   | ListenResolIdle       | Resolution of Listen mode Idle time <br> 01 → 64 us |
-|               |         | 5-4   | ListenResolRx         | Resolution of Listen mode Rx time <br> 11 → 262 ms |
-|               |         | 2-1   | ListenEnd             | Action taken after acceptance of a packet in Listen mode <br> 01 → chip stays in Rx mode until PayloadReady or Timeout interrupt occurs. It then goes to the mode defined by Mode. Listen mode stops and must be disabled <br> 10 → chip stays in Rx mode until PayloadReady or Timeout interrupt occurs. Listen mode then resumes in Idle state. FIFO content is lost at next Rx wakeup. |
-| RegListen2    | 0x0e    | 7-0   | ListenCoefIdle        | Duration of the Idle phase in Listen mode |
-| RegListen3    | 0x0f    | 7-0   | ListenCoefRx          | Duration of the Rx phase in Listen mode |
 
 ## Receiver Registers
 | Name          | Address | Bits  | Name                  | Description                  |
