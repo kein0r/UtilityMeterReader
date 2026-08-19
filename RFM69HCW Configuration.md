@@ -41,8 +41,7 @@ Registers used. All non-mentioned bits default to 0
 
 | Name          | Address | Bits  | Name                  | Description                  |
 | ----          | ------- | ----  | ----                  | -----------                  |
-| RegOpMode     | 0x01    | 6     | ListenOn              | Enables listen mode, enabled while in stand-by |
-|               |         | 4-2   | Mode                  | 001 → Standby mode (STDBY) <br> 100 → Receiver mode (RX)|
+| RegOpMode     | 0x01    | 4-2   | Mode                  | 001 → Standby mode (STDBY) <br> 100 → Receiver mode (RX)|
 | RegDataModul  | 0x02    | 6-5   | DataMode              | 00 → Packet mode             |
 |               |         | 4-3   | ModulationType        | 01 → OOK                     |
 |               |         | 1-0   | ModulationShaping     | 00 → no shaping (default) tbc |
