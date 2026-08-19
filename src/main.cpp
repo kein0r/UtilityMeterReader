@@ -74,12 +74,8 @@ void setup() {
     while (1);
   }
   Serial.println("RFM69 radio init OK!");
-<<<<<<< Updated upstream
-=======
-
   rfm69.setMode(RFM69_REGOPMODE_MODE_RX);
->>>>>>> Stashed changes
-
+  
   Serial.println("Register overview:");
   rfm69.printRegister(RFM69_REGFRFMSB);
   rfm69.printRegister(RFM69_REGFRFMID);
