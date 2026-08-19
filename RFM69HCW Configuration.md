@@ -90,12 +90,12 @@ Registers used. All non-mentioned bits default to 0
 ### RegBitrate, RegBitrate, RegFrf
 Bit rate = 32768, FXO = 32MHz RegBitrage = 32000000/32768 = 976,5625 (0x3d0)
 - RegBitrateMsb: 0x03
-- RegBitrateMsb: 0xd0
+- RegBitrateLsb: 0xd0
 
-Target frequency:
+Target frequency: 912.38
 - f_step = 32Mhz/2^19
 - f_rf = f_step * RegFrf
-- RegFrf = f_rf/f_step = f_rf * 2^19/32MHz
+- RegFrf = f_rf/f_step = f_rf * 2^19/32MHz = 14948433.92 = 0xE41851
 
 ### RegListen1, RegListen2, RegListen3
 Power consumption is not a problem. Minimize idle time, maximize Rx time.

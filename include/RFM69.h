@@ -19,7 +19,7 @@
 
 /* 3.2.3. PLL Architecture: F_Step = F_Xosc/2^19 */
 #define RFM69_FXOSC 32000000.0
-#define RFM69_FSTEP uint32_t(RFM69_FXOSC / 524288)
+#define RFM69_FSTEP float(RFM69_FXOSC / 524288)
 
 /* 6.2. Common Configuration Registers */
 #define RFM69_REGFIFO                         0x00

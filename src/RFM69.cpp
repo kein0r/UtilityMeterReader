@@ -51,8 +51,7 @@ void RFM69::setBitrate(uint16_t bitrate)
     uint16_t regValue;
     regValue = 32000000 / bitrate;
     writeRegister(RFM69_REGBITRATEMSB, (regValue >> 8) & 0xff);
-    regValue = bitrate & 0xff;
-    writeRegister(RFM69_REGBITRATELSB, regValue  & 0xff);
+    writeRegister(RFM69_REGBITRATELSB, regValue & 0xff);
 }
 
 void RFM69::setSampleRate(uint8_t RxBwMant, uint8_t RxBwExp)
@@ -72,10 +71,14 @@ void RFM69::setMode(uint8_t mode)
 
 void RFM69::writeRegister(uint8_t reg, uint8_t value)
 {
+#ifdef DEBUG
     Serial.print("Write 0x");
     Serial.print(reg, HEX);
     Serial.print(" : 0b");
-    Serial.println(value, BIN);
+    Serial.print(value, BIN);
+    Serial.print(" -> 0x");
+    Serial.println(value, HEX);
+#endif
     digitalWrite(_slaveSelectPin, LOW);
     _SPI->transfer(reg | RFM69_REGWRITEMASK);
     _SPI->transfer(value);
