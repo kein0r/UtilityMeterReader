@@ -25,6 +25,8 @@ arduino::MbedSPI SPI1(RFM69_CIPO, RFM69_COPI, RFM69_SCK);
 bool rxBufferValid = false;
 uint8_t rxBufferIDM[0x5c];
 
+uint8_t ItronR900syncWord[8] = {0xa9, 0x66, 0x69, 0x65};
+
 // Singleton instance of the radio driver
 RFM69 rfm69(&SPI1, RFM69_CS, RFM69_INT, rxBufferIDM);
 
@@ -74,6 +76,7 @@ void setup() {
     while (1);
   }
   Serial.println("RFM69 radio init OK!");
+  rfm69.setSyncWord(ItronR900syncWord, 2);
   rfm69.setMode(RFM69_REGOPMODE_MODE_RX);
   
   Serial.println("Register overview:");
@@ -85,14 +88,20 @@ void setup() {
   rfm69.printRegister(RFM69_REGRXBW);
 } 
 
-void loop() {
- if (rxBufferValid)
- {
-    Serial.println();
-    Serial.print(millis());
-    Serial.print(": Rcvd: ");
- }
- delay(5000);
- rfm69.printRegister(RFM69_REGOPMODE);
- rfm69.printRegister(RFM69_REGIRQFLAGS2);
+void loop() 
+{
+  uint8_t regIRQFlags;
+  delay(1000);
+  regIRQFlags = rfm69.readRegister(RFM69_REGIRQFLAGS2);
+  if (regIRQFlags & RFM69_REGIRQFLAGS2_PAYLOADREADY)
+  {
+    Serial.print("Payload ready: ");
+    for (uint8_t i=0; i< 12; i++)
+    {
+      rfm69.printRegister(RFM69_REGFIFO);
+    }
+  /* Clear interrupts */
+  rfm69.writeRegister(RFM69_REGIRQFLAGS2, 0x0);
+  }
+
 }

@@ -27,9 +27,9 @@ bool RFM69::init(float frequency, uint16_t bitrate)
         setBitrate(bitrate);
         setFrequency(frequency);
         /* Set highest possible sample rate for now */
-        setSampleRate(RFM69_REGRXBW_RXBWMANT_16, RFM69_REGRXBW_RXBWEXP_0);
+        setBandwidth(RFM69_REGRXBW_RXBWMANT_16, RFM69_REGRXBW_RXBWEXP_0);
         /* Enable Fixed Length Packet Format */
-        writeRegister(RFM69_REGSYNCCONFIG, RFM69_REGSYNCCONFIG_SYNCON_OFF | RFM69_REGSYNCCONFIG_SYNCSIZE(0));
+
         writeRegister(RFM69_REGPACKETCONFIG1, RFM69_REGPACKETCONFIG1_PACKETFORMAT_FIXEDLENGTH | RFM69_REGPACKETCONFIG1_DCFREE_NONE | RFM69_REGPACKETCONFIG1_CRCON_OFF | RFM69_REGPACKETCONFIG1_CRCAUTOCLEAROFF_NOCLEAR | RFM69_REGPACKETCONFIG1_ADDRESSFILTERING_NONE);
         writeRegister(RFM69_REGPAYLOADLENGTH, 21);
         retValue = true;
@@ -52,13 +52,20 @@ void RFM69::setBitrate(uint16_t bitrate)
     regValue = 32000000 / bitrate;
     writeRegister(RFM69_REGBITRATEMSB, (regValue >> 8) & 0xff);
     writeRegister(RFM69_REGBITRATELSB, regValue & 0xff);
+    /* Set frequency deviation based on birate/2
+     * Fdev = f_step * RegFdev -> RegFdev = Fdev/f_Step = bitrate/2/32Mhz/2^19 */
+    regValue = bitrate/2/RFM69_FSTEP;
+    writeRegister(RFM69_REGFDEVMSB, (regValue >> 8) & 0xff);
+    writeRegister(RFM69_REGFDEVLSB, regValue & 0xff);
 }
 
-void RFM69::setSampleRate(uint8_t RxBwMant, uint8_t RxBwExp)
+void RFM69::setBandwidth(uint8_t RxBwMant, uint8_t RxBwExp)
 {
     uint8_t regValue;
-    regValue = RFM69_REGRXBW_DCCFREQ_4PERCENT | RxBwMant | RxBwExp;
+    regValue = RFM69_REGRXBW_DCCFREQ_16P | RxBwMant | RxBwExp;
     writeRegister(RFM69_REGRXBW, regValue);
+    /* Set same value for AFC too */
+    writeRegister(RFM69_REGAFCBW, regValue);
 }
 
 void RFM69::setMode(uint8_t mode)
@@ -67,6 +74,15 @@ void RFM69::setMode(uint8_t mode)
     modeRegValue = readRegister(RFM69_REGOPMODE);
     modeRegValue = (modeRegValue & ~RFM69_REGOPMODE_MODE_MASK) | mode;
     writeRegister(RFM69_REGOPMODE, modeRegValue);
+}
+
+void RFM69::setSyncWord(uint8_t *syncWord, uint8_t length)
+{
+    for (uint8_t i = 0; i < length; i++)
+    {
+        writeRegister(RFM69_REGSYNCVALUE1+i, syncWord[i]);
+    }
+    writeRegister(RFM69_REGSYNCCONFIG, RFM69_REGSYNCCONFIG_SYNCON_ON | RFM69_REGSYNCCONFIG_SYNCSIZE(length));
 }
 
 void RFM69::writeRegister(uint8_t reg, uint8_t value)

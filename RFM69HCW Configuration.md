@@ -31,7 +31,8 @@ Technically "5.5.2.1. Fixed Length Packet Format" should be usable configuring i
 |                                      |                             | Payload (min 1 byte)        |                  |
 
 Fixed length packet format is selected when bit PacketFormat is set to 0 and PayloadLength is set to any value greater
-than 0.  
+than 0. In this mode at least one byte of preamble needs to be configured (SyncSize >= 1), otherwise PayloadReady IRQ 
+will never be triggered.  
 Downside of this is that only one type of meter can be read at any given point in time.
 
 ## Registers
@@ -57,6 +58,7 @@ Registers used. All non-mentioned bits default to 0
 | RegRxBw       | 0x19    | 7-5   | DccFreq               | Cut-off frequency of the DC offset canceller (DCC). Default 010 |
 |               |         | 4-3   | RxBwMant              | Channel filter bandwidth control <br> 00 → RxBwMant = 16 |
 |               |         | 2-0   | RxBwExp               | Channel filter bandwidth control exponent 00 (see below) |
+| RegAfcBw      | 0x1a    | 7-0   | see above             | Same values as RegRxBw |
 
 ## Packet Engine Registers
 | Name          | Address | Bits | Name                  | Description                  |

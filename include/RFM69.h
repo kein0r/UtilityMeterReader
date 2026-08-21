@@ -43,6 +43,8 @@
 
 #define RFM69_REGBITRATEMSB    0x03
 #define RFM69_REGBITRATELSB    0x04
+#define RFM69_REGFDEVMSB       0x05
+#define RFM69_REGFDEVLSB       0x06
 
 #define RFM69_REGFRFMSB 0x07
 #define RFM69_REGFRFMID 0x08
@@ -71,18 +73,25 @@
 
 /* 6.4. Receiver Registers */
 #define RFM69_REGRXBW 0x19
-#define RFM69_REGRXBW_DCCFREQ_4PERCENT (0x2 << 5)
-#define RFM69_REGRXBW_RXBWMANT_16      (0x0 << 3)
-#define RFM69_REGRXBW_RXBWMANT_20      (0x1 << 3)
-#define RFM69_REGRXBW_RXBWMANT_24      (0x2 << 3)
-#define RFM69_REGRXBW_RXBWEXP_0        (0x0 << 0)
-#define RFM69_REGRXBW_RXBWEXP_1        (0x1 << 0)
-#define RFM69_REGRXBW_RXBWEXP_2        (0x2 << 0)
-#define RFM69_REGRXBW_RXBWEXP_3        (0x3 << 0)
-#define RFM69_REGRXBW_RXBWEXP_4        (0x4 << 0)
-#define RFM69_REGRXBW_RXBWEXP_5        (0x5 << 0)
-#define RFM69_REGRXBW_RXBWEXP_6        (0x6 << 0)
-#define RFM69_REGRXBW_RXBWEXP_7        (0x7 << 0)
+#define RFM69_REGRXBW_DCCFREQ_16P    (0x0 << 5)
+#define RFM69_REGRXBW_DCCFREQ_8P     (0x1 << 5)
+#define RFM69_REGRXBW_DCCFREQ_4P     (0x2 << 5)
+#define RFM69_REGRXBW_DCCFREQ_2P     (0x3 << 5)
+#define RFM69_REGRXBW_DCCFREQ_1P     (0x4 << 5)
+#define RFM69_REGRXBW_DCCFREQ_0P5    (0x5 << 5)
+#define RFM69_REGRXBW_DCCFREQ_0P25   (0x6 << 5)
+#define RFM69_REGRXBW_DCCFREQ_0P125  (0x7 << 5)
+#define RFM69_REGRXBW_RXBWMANT_16    (0x0 << 3)
+#define RFM69_REGRXBW_RXBWMANT_20    (0x1 << 3)
+#define RFM69_REGRXBW_RXBWMANT_24    (0x2 << 3)
+#define RFM69_REGRXBW_RXBWEXP_0      (0x0 << 0)
+#define RFM69_REGRXBW_RXBWEXP_1      (0x1 << 0)
+#define RFM69_REGRXBW_RXBWEXP_2      (0x2 << 0)
+#define RFM69_REGRXBW_RXBWEXP_3      (0x3 << 0)
+#define RFM69_REGRXBW_RXBWEXP_4      (0x4 << 0)
+#define RFM69_REGRXBW_RXBWEXP_5      (0x5 << 0)
+#define RFM69_REGRXBW_RXBWEXP_6      (0x6 << 0)
+#define RFM69_REGRXBW_RXBWEXP_7      (0x7 << 0)
 
 #define RFM69_REGAFCBW 0x1a
 
@@ -152,8 +161,9 @@ public:
   bool init(float frequency = 912.38, uint16_t bitrate = 32768);
   void setFrequency(float centerFrequency);
   void setBitrate(uint16_t bitrate);
-  void setSampleRate(uint8_t RxBwMant, uint8_t RxBwExp);
+  void setBandwidth(uint8_t RxBwMant, uint8_t RxBwExp);
   void setMode(uint8_t mode);
+  void setSyncWord(uint8_t *syncWord, uint8_t length);
   void writeRegister (uint8_t reg, uint8_t value);
   uint8_t readRegister (uint8_t reg);
   void printRegister(uint8_t reg);
